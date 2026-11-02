@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inicio</title>
+<style>
+  /* PPFrama-Black está instalada en el Mac; en la TV cae a la alternativa */
+  @font-face{font-family:'FramaBlack';src:local('PPFrama-Black'),local('PPFrama Black'),local('PPFramaBlack');}
+  @font-face{font-family:'GroteskMed';src:local('NHaasGroteskDSPro-65Md'),local('Neue Haas Grotesk Display Pro 65 Medium'),local('HelveticaNeue-Medium');}
+
+  :root{
+    --m:48px;          /* margen */
+    --c:141px;         /* columna */
+    --g:12px;          /* calle */
+    --col6:calc(var(--m) + 5 * (var(--c) + var(--g)));
+    --col8:calc(var(--m) + 7 * (var(--c) + var(--g)));
+    --col9:calc(var(--m) + 8 * (var(--c) + var(--g)));
+    --col10:calc(var(--m) + 10 * (var(--c) + var(--g)));
+    --col11:calc(var(--m) + 11 * (var(--c) + var(--g)));
+    --col1:calc(var(--m) + 1 * (var(--c) + var(--g)));
+    --paper:#FFFFFF;
+    --ghost:#EDEDED;
+    --ink:#1A1A1A;
+    --red:#E0321F;
+    --green:#23402F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'GroteskMed','Helvetica Neue',Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+
+  .stage{position:fixed;inset:0;overflow:hidden;background:var(--paper)}
+
+  /* ---------- campo tipográfico ---------- */
+  .rail{position:absolute;inset:0}
+  .word{
+    position:absolute;
+    font-family:'FramaBlack','Archivo Black','Helvetica Neue',Arial,sans-serif;
+    font-weight:900;
+    color:var(--ghost);
+    white-space:nowrap;
+    line-height:1;
+    letter-spacing:-.02em;
+    transform-origin:left top;
+    z-index:1;
+    transition:filter 200ms linear, opacity 200ms linear;
+  }
+
+  /* ---------- imagen del activo ---------- */
+  #frame{
+    z-index:3;
+    position:absolute;left:var(--col6);top:353.178px;width:calc(2 * var(--c) + var(--g));height:373.644px;
+    overflow:hidden;background:#EDEDED;
+  }
+  #frame img{width:100%;height:100%;object-fit:cover;object-position:50% 22%;display:block}
+  @keyframes aparecer{
+    0%{filter:blur(20px);transform:scale(1.07);opacity:.25}
+    100%{filter:blur(0);transform:scale(1);opacity:1}
+  }
+  #pic.aparecer{animation:aparecer 460ms cubic-bezier(.2,.7,.2,1) both}
+  #frame .ph{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:'FramaBlack','Archivo Black',Arial,sans-serif;font-size:150px;color:#FFFFFF;
+  }
+
+  /* ---------- microtipografía ---------- */
+  .u{position:absolute;z-index:5;text-transform:uppercase;font-size:15px;line-height:14px;letter-spacing:.005em;color:#1E1E1E}
+  .u.dim{color:#1E1E1E}
+  #appName{left:var(--col8);top:355.267px}
+  #desc{left:var(--col9);top:523px;width:calc(3 * var(--c) + 2 * var(--g))}
+  #index{left:var(--col1);top:532px}
+  #home{left:48px;top:47px}
+  #topA{left:var(--col10);top:47px}
+  #topB{right:var(--m);text-align:right;top:47px}
+  #botA{left:48px;top:1018px}
+  #botB{left:var(--col1);top:1018px}
+  #botC{left:50%;top:1018px;transform:translateX(-50%);text-align:center;white-space:nowrap}
+  #botD{right:var(--m);text-align:right;top:1018px}
+  .sq{position:absolute;z-index:5;width:12px;height:12px;background:var(--red)}
+  #sqL{left:48px;top:534px;transition:top 260ms cubic-bezier(.2,.7,.2,1)}
+    #svc{display:inline-block;width:7px;height:7px;border-radius:50%;background:#C9C9C9;margin-right:6px;vertical-align:1px}
+  #svc.ok{background:var(--green)}
+  #svc.bad{background:var(--red)}
+
+  #err{position:fixed;left:0;right:0;bottom:0;background:var(--red);color:#fff;
+       font:12px/1.4 Menlo,monospace;padding:6px 10px;display:none;z-index:99;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="rail" id="rail"></div>
+  <div id="frame"><img id="pic" alt="" style="display:none"><div class="ph" id="ph"></div></div>
+
+  <div class="u" id="appName">—</div>
+  <div class="u" id="desc"></div>
+  <div class="u dim" id="index">(001)</div>
+  <div class="u" id="home">inicio</div>
+  <div class="u dim" id="topA">TIZEN</div>
+  <div class="u dim" id="topB"></div>
+  <div class="u dim" id="botA">INICIO</div>
+  <div class="u dim" id="botB">08 APPS</div>
+  <div class="u dim" id="botC"><span id="svc"></span><span id="svcTxt">servicio</span></div>
+  <div class="u dim" id="botD"></div>
+
+  <div class="sq" id="sqL"></div>
+  </div>
+<style id="static">.static *{animation:none!important;transition:none!important}</style>
+<div id="err"></div>
+<script>
+window.onerror=function(m,s,l,c){var d=document.getElementById('err');
+d.style.display='block';d.textContent='ERROR: '+m+'  @'+l+':'+c;return false;};
+
+var SERVICE="http://127.0.0.1:8090";
+
+var APPS=[
+  {label:"Netflix", img:"assets/netflix.jpg",    ph:"#1A1A1A", x:648.56, match:/netflix/i,         desc:"Series y películas. El catálogo completo."},
+  {label:"Disney+", img:"assets/disney.jpg",    ph:"#2B45C4", x:586.40, match:/disney/i,          desc:"Disney, Pixar, Marvel, Star Wars y National Geographic."},
+  {label:"Prime Video", img:"assets/prime.jpg",ph:"#2B45C4", x:397.79, match:/prime|amazon/i,    desc:"El catálogo de Amazon, con deporte en directo."},
+  {label:"Spotify",    x:277.17, match:/spotify/i, img:"assets/spotify.jpg", desc:"Música, pódcast y listas. Reproduce desde el móvil o desde el mando."},
+  {label:"Mediaset", img:"assets/mediaset.jpg",   ph:"#E0321F", x:511.84, match:/mediaset|mitele/i, desc:"Los canales y el catálogo de Mediaset España."},
+  {label:"Plex", img:"assets/plex.jpg",       ph:"#23402F", x:752.52, match:/plex/i,            desc:"Tu servidor multimedia, ordenado en casa."},
+  {label:"YouTube", img:"assets/youtube.jpg",    ph:"#E0321F", x:544.03, match:/youtube/i,         desc:"Vídeo, música y directos."},
+  {label:"Apple TV", img:"assets/appletv.jpg",   ph:"#1A1A1A", x:620.00, match:/apple/i,           desc:"Apple TV+ y el catálogo de Apple."}
+];
+
+var SIZES={base:185, active:370};
+var BASE_ACTIVE=660.25;
+var ASC=0.72, DESC=0.20, GAP_ACTIVE=47, GAP_NORMAL=27.8, ASC_BOX=0.76;
+var MAXW=1600;
+
+var QUIPS={
+ "Netflix":["Siempre hay una serie más: lo sabes, lo aceptas, te prometes que es la última y le das al siguiente capítulo.",
+            "El plan era dormir temprano, pero el catálogo tenía otra idea y, la verdad, era una idea mejor que la tuya."],
+ "Spotify":["Nada suena mal aquí: la lista perfecta para fregar los platos, correr o mirar el techo pensando en nada.",
+            "Mil canciones para no elegir ninguna y, aun así, merece la pena abrir la app solo por verlas todas juntas."],
+ "YouTube":["Empiezas con un tutorial de dos minutos y despiertas tres horas después viendo un documental de trenes.",
+            "El algoritmo sabe lo que quieres antes de que lo busques, y tú se lo agradeces con otra hora de vídeo."],
+ "Prime Video":["El envío llega en un día; la serie que te recomendaron, en tres episodios seguidos y sin levantarse.",
+                "Deportes en directo o una película de hace veinte años: la decisión dura más que el propio envío."],
+ "Disney+":["Un clásico para los niños y otro para ti, discretamente disfrazado de clásico para los niños.",
+            "Creías que no ibas a llorar con una película de dibujos animados; otra vez creías mal, y ya van muchas."],
+ "Mediaset":["El directo no espera a nadie: informativos, realities y ese programa que nunca reconocerás ver.",
+             "Zapear sin rumbo es un deporte nacional y esta app te lo pone demasiado fácil a cualquier hora."],
+ "Plex":["Tu servidor, tus reglas, tu colección: exactamente la película que querías, sin buscar demasiado.",
+         "Nadie más tiene esta copia y por eso suena mejor que cualquier catálogo que puedas contratar."],
+ "Apple TV":["Poca cantidad y mucho criterio: entras a mirar una y acabas viendo tres seguidas sin darte cuenta.",
+             "Imagen impecable, catálogo corto y, aun así, nunca sales de aquí con las manos vacías."]
+};
+
+var rail=document.getElementById("rail");
+var nodes=[];
+var lastActive=-1;
+var active=parseInt((new URLSearchParams(location.search).get("i")||"0"),10)||0;
+
+APPS.forEach(function(app,i){
+  var d=document.createElement("div");
+  d.className="word";
+  d.textContent=app.label;
+  d.style.left=app.x+"px";
+  d.addEventListener("click",function(){ active=i; render(); });
+  d.addEventListener("mouseenter",function(){ if(active!==i){ active=i; render(); } });
+  rail.appendChild(d);
+  nodes.push(d);
+});
+
+var cv=document.createElement("canvas"), ctx=cv.getContext("2d");
+function widthAt(text,size){
+  ctx.font=size+'px "FramaBlack", "Archivo Black", "Helvetica Neue", Arial';
+  return ctx.measureText(text).width;
+}
+function sizeFor(app){
+  var w=widthAt(app.label,SIZES.active);
+  if(w<=MAXW) return SIZES.active;
+  return Math.floor(SIZES.active*MAXW/w);
+}
+
+function pad(n){ return n<10?"0"+n:""+n; }
+
+/* posición de la línea base de cada fila, con el aire exacto entre palabras */
+function baselines(){
+  var N=APPS.length, S=[], B=[];
+  for(var i=0;i<N;i++) S[i]=(i===active)?sizeFor(APPS[i]):SIZES.base;
+  B[active]=BASE_ACTIVE;
+  for(var a=active-1;a>=0;a--){
+    var gap=(a+1===active)?GAP_ACTIVE:GAP_NORMAL;
+    B[a]=B[a+1]-ASC*S[a+1]-DESC*S[a]-gap;
+  }
+  for(var b=active+1;b<N;b++){
+    var gap2=(b-1===active)?GAP_ACTIVE:GAP_NORMAL;
+    B[b]=B[b-1]+DESC*S[b-1]+gap2+ASC*S[b];
+  }
+  return {B:B,S:S};
+}
+
+function render(){
+  var N=APPS.length, g=baselines();
+  document.getElementById("sqL").style.top=(g.B[active]-6)+"px";
+  for(var rel=-4; rel<=3; rel++){
+    var i=(active+rel+N*2)%N;
+    var app=APPS[i], n=nodes[i], isActive=(rel===0);
+    var size=g.S[i];
+    n.style.fontSize=size+"px";
+    n.style.top=(g.B[i]-size*ASC_BOX)+"px";
+    n.style.left=(isActive?277:app.x)+"px";
+    n.style.zIndex=isActive?1:0;
+    var dist=Math.abs(rel);
+    n.style.filter=isActive?"none":("blur("+(dist===1?1.6:dist===2?3.2:5)+"px)");
+    n.style.opacity=isActive?1:(dist===1?0.95:0.85);
+  }
+
+  var a=APPS[active];
+  var ph=document.getElementById("ph"), pic=document.getElementById("pic");
+  ph.textContent=a.label.charAt(0);
+  ph.style.background=a.ph||"#1A1A1A";
+  if(a.img){
+    pic.onerror=function(){ this.style.display="none"; ph.style.display="flex"; };
+    pic.src=a.img; pic.style.display="block"; ph.style.display="none";
+    if(active!==lastActive){ pic.classList.remove("aparecer"); void pic.offsetWidth; pic.classList.add("aparecer"); }
+  }
+  else { pic.style.display="none"; ph.style.display="flex"; }
+
+  document.getElementById("appName").textContent=a.label;
+  if(active!==lastActive){
+    if(lastActive>=0){ APPS[active].qi=((APPS[active].qi||0)+1)%QUIPS[a.label].length; }
+    lastActive=active;
+  }
+  document.getElementById("desc").textContent=QUIPS[a.label][APPS[active].qi||0];
+  document.getElementById("index").textContent="("+(active<9?"00":active<99?"0":"")+(active+1)+")";
+  document.getElementById("botB").textContent="OTRAS APPS";
+}
+
+/* ---------- servicio del módulo ---------- */
+function dbg(t){ var e=document.getElementById("svcTxt"); if(e) e.textContent=t; }
+
+var tries=0;
+function boot(){
+  if(new URLSearchParams(location.search).get("preview")){ document.documentElement.className+=" static"; return; }
+  tries++;
+  fetch(SERVICE+"/status",{cache:"no-store"})
+    .then(function(r){return r.json();})
+    .then(function(st){ window.__status=st; return fetch(SERVICE+"/apps",{cache:"no-store"}); })
+    .then(function(r){ return r.json(); })
+    .then(function(list){
+      if(!Array.isArray(list)) throw new Error("lista inválida");
+      var found=0;
+      APPS.forEach(function(app){
+        var hit=list.filter(function(x){return app.match.test(x.name||"")&&x.id;})[0];
+        if(hit){ app.id=hit.id; found++; }
+      });
+      document.getElementById("svc").className="ok";
+      dbg("SERVICIO OK · "+found+"/"+APPS.length+" APPS");
+      if(window.__status){
+        var pl=window.__status.platform;
+        if(pl) document.getElementById("topA").textContent="TIZEN "+pl;
+      }
+    })
+    .catch(function(e){
+      if(tries<20){ setTimeout(boot,1200); return; }
+      document.getElementById("svc").className="bad";
+      dbg("SIN SERVICIO · "+(e&&e.message?e.message:e));
+    });
+}
+
+function launch(){
+  var a=APPS[active];
+  if(!a.id){ dbg(a.label+" · no instalada"); return; }
+  fetch(SERVICE+"/launch?id="+encodeURIComponent(a.id))
+    .then(function(r){return r.json();})
+    .then(function(j){ if(!j.ok) dbg(a.label+" · no abrió"); })
+    .catch(function(){ dbg("servicio caído"); });
+}
+
+function onKey(e){
+  var k=e.keyCode;
+  if(k===38||k===37){ active=(active-1+APPS.length)%APPS.length; render(); }
+  else if(k===40||k===39){ active=(active+1)%APPS.length; render(); }
+  else if(k===13||k===10252){ launch(); }
+  else return;
+  e.preventDefault();
+}
+document.addEventListener("keydown",onKey,true);
+window.addEventListener("keydown",onKey,false);
+
+function tick(){
+  var d=new Date(), t=pad(d.getHours())+":"+pad(d.getMinutes());
+  document.getElementById("topB").textContent=t;
+  document.getElementById("botD").textContent=pad(d.getDate())+"."+pad(d.getMonth()+1)+"."+String(d.getFullYear()).slice(2);
+}
+tick(); setInterval(tick,20000);
+
+render();
+boot();
+</script>
+</body>
+</html>
