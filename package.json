@@ -1,0 +1,11 @@
+{
+  "name": "tizenbrew-inicio",
+  "version": "2.8.0",
+  "description": "Pantalla de inicio minimal para TizenBrew: retícula suiza, papel y apertura de apps nativas.",
+  "packageType": "app",
+  "appName": "Inicio",
+  "appPath": "app/index.html",
+  "serviceFile": "service.js",
+  "keys": [],
+  "license": "MIT"
+}
