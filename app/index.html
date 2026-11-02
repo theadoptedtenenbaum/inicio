@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inicio</title>
+<style>
+  /* -----------------------------------------------------------------
+     Papel + retícula suiza + materialidad iOS.
+     Paleta: papel #EEE8DA · tinta #1A1A1A · azul #2B45C4
+             rojo #E0321F (índice) · verde #23402F (etiquetas)
+     Todo el texto vive dentro de cajas con padding: nada toca el borde.
+     ----------------------------------------------------------------- */
+  :root{
+    --paper:#EEE8DA;
+    --paper-hi:#F7F2E7;
+    --paper-lo:#E6DECC;
+    --ink:#1A1A1A;
+    --ink-soft:rgba(26,26,26,.58);
+    --blue:#2B45C4;
+    --red:#E0321F;
+    --green:#23402F;
+
+    --hair:rgba(26,26,26,.14);
+    --hair-soft:rgba(35,64,47,.14);
+
+    --margin-x:96px;
+    --pad-card:30px;
+    --radius-card:22px;
+    --gap:26px;
+    --ease:cubic-bezier(.4,0,.2,1);
+    --spring:cubic-bezier(.34,1.32,.5,1);
+  }
+  html.dark{
+    --paper:#1A1A1A;
+    --paper-hi:#232323;
+    --paper-lo:#141414;
+    --ink:#EEE8DA;
+    --ink-soft:rgba(238,232,218,.56);
+    --hair:rgba(238,232,218,.16);
+    --hair-soft:rgba(238,232,218,.10);
+    --green:#9DBFA8;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:linear-gradient(180deg,var(--paper-hi) 0%,var(--paper) 46%,var(--paper-lo) 100%);
+    color:var(--ink);
+    font-family:-apple-system,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    overflow:hidden;
+  }
+
+  /* ---------- cabecera ---------- */
+  header{
+    position:fixed;top:56px;left:var(--margin-x);right:var(--margin-x);
+    display:flex;align-items:center;justify-content:space-between;z-index:4;
+  }
+  .brand{display:flex;align-items:center}
+  .brand .dot{width:9px;height:9px;border-radius:2.5px;background:var(--red);display:block}
+  .brand .word{font-size:12px;font-weight:680;letter-spacing:.26em;text-transform:uppercase}
+  #clock{
+    font-size:12px;font-weight:620;letter-spacing:.14em;
+    font-variant-numeric:tabular-nums;color:var(--ink-soft);
+  }
+
+  .brand > * + *{margin-left:13px}
+  .keys > * + *{margin-left:16px}
+  .keys .grp > * + *{margin-left:9px}
+  .right > * + *{margin-left:14px}
+  .right{display:flex;align-items:center}
+  .svc{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--ink-soft);opacity:.30;
+    transition:background 200ms var(--ease),opacity 200ms var(--ease);
+  }
+  .svc.ok{background:var(--green);opacity:1}
+  .svc.bad{background:var(--red);opacity:1}
+
+  /* ---------- lienzo ---------- */
+  main{
+    position:relative;height:100%;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:0 var(--margin-x);
+  }
+  main::before{ /* regla de margen: la retícula se declara, en verde */
+    content:"";position:absolute;left:var(--margin-x);top:104px;bottom:104px;
+    width:1px;background:var(--hair-soft);
+  }
+
+  .caption{
+    display:flex;align-items:baseline;justify-content:space-between;
+    padding-bottom:18px;margin-bottom:26px;
+    border-bottom:1px solid var(--hair);
+  }
+  .caption .l{
+    font-size:11px;font-weight:640;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--green);
+  }
+  .caption .r{
+    font-size:11px;font-weight:620;letter-spacing:.16em;
+    color:var(--ink-soft);font-variant-numeric:tabular-nums;
+  }
+
+  .grid{display:flex;flex-wrap:wrap;margin:0 calc(var(--gap) / -2)}
+
+  /* ---------- tarjeta ---------- */
+  .card{
+    position:relative;
+    width:calc(25% - var(--gap));
+    margin:0 calc(var(--gap) / 2) var(--gap);
+    height:176px;
+    padding:var(--pad-card);
+    border-radius:var(--radius-card);
+    background:rgba(255,255,255,.42);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.85),
+      inset 0 0 0 1px rgba(26,26,26,.09),
+      0 10px 24px -18px rgba(26,26,26,.55);
+    display:flex;flex-direction:column;justify-content:space-between;
+    transition:
+      transform 440ms var(--spring),
+      background 220ms var(--ease),
+      box-shadow 240ms var(--ease);
+    will-change:transform;
+  }
+  .n{
+    font-size:11px;font-weight:660;letter-spacing:.20em;
+    color:var(--red);font-variant-numeric:tabular-nums;
+  }
+  .t{
+    font-size:31px;font-weight:620;line-height:1.04;
+    letter-spacing:-.022em;
+  }
+  .m{
+    font-size:10px;font-weight:620;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--green);opacity:.78;
+  }
+
+  /* foco: se eleva, se enciende en azul y respira — sin desenfoques */
+  .card.focused{
+    transform:translateY(-7px) scale(1.012);
+    background:#FFFDF6;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.95),
+      inset 0 0 0 1.5px rgba(43,69,196,.42),
+      0 26px 44px -22px rgba(26,26,26,.42),
+      0 0 0 5px rgba(43,69,196,.085);
+  }
+  .card.focused .n{color:var(--blue)}
+
+  /* ---------- pie ---------- */
+  footer{
+    position:fixed;left:var(--margin-x);right:var(--margin-x);bottom:52px;
+    display:flex;align-items:center;justify-content:space-between;z-index:4;
+    font-size:10.5px;font-weight:640;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .keys{display:flex;align-items:center}
+  .keys .grp{display:flex;align-items:center}
+  kbd{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:24px;height:24px;padding:0 7px;border-radius:7px;
+    background:rgba(255,255,255,.55);
+    box-shadow:inset 0 0 0 1px rgba(26,26,26,.12),0 1px 2px rgba(26,26,26,.06);
+    font-family:inherit;font-size:11px;font-weight:700;letter-spacing:0;
+    color:var(--ink);
+  }
+  .sep{width:1px;height:12px;background:var(--hair)}
+  #toast{
+    position:fixed;left:var(--margin-x);bottom:104px;
+    padding:11px 18px;border-radius:12px;
+    background:rgba(255,253,246,.92);
+    box-shadow:0 12px 26px -14px rgba(26,26,26,.5),inset 0 0 0 1px rgba(26,26,26,.08);
+    font-size:11px;font-weight:640;letter-spacing:.12em;text-transform:uppercase;
+    opacity:0;transform:translateY(6px);
+    transition:opacity 180ms var(--ease),transform 320ms var(--spring);
+    z-index:5;
+  }
+  #toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div id="err"></div>
+<style>#err{position:fixed;left:0;right:0;bottom:0;background:#E0321F;color:#fff;
+font:12px/1.45 ui-monospace,Menlo,monospace;padding:8px 12px;display:none;z-index:99;white-space:pre-wrap}</style>
+<script>
+window.onerror=function(m,src,l,c){var d=document.getElementById('err');
+d.style.display='block';d.textContent='ERROR: '+m+'  @'+l+':'+c;return false;};
+</script>
+  <header>
+    <div class="brand"><span class="dot"></span><span class="word">Inicio</span></div>
+    <div class="right"><span class="svc" id="svc"></span><div id="clock">--:--</div></div>
+  </header>
+
+  <main>
+    <div class="caption">
+      <div class="l">Selección</div>
+      <div class="r" id="counter">01—08</div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <footer>
+    <div class="keys">
+      <span class="grp"><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> Navegar</span>
+      <span class="sep"></span>
+      <span class="grp"><kbd>OK</kbd> Abrir</span>
+    </div>
+    <div id="hint">Retícula 4 × 2 · <span id="dbg">sin teclas</span></div>
+  </footer>
+
+  <div id="toast"></div>
+
+<script>
+  /* El módulo-app NO tiene acceso a `tizen`: quien lo tiene es su serviceFile.
+     Así que la página pide todo a ese servicio HTTP local. */
+  var SERVICE = "http://127.0.0.1:8090";
+
+  var APPS = [
+    { label:"Mediaset",    match:/mediaset|mitele/i },
+    { label:"Spotify",     match:/spotify/i,  meta:"Audio" },
+    { label:"YouTube",     match:/youtube/i },
+    { label:"Plex",        match:/plex/i,     meta:"Servidor" },
+    { label:"Apple TV",    match:/apple/i },
+    { label:"Disney+",     match:/disney/i },
+    { label:"Prime Video", match:/prime|amazon|video/i },
+    { label:"Netflix",     match:/netflix/i }
+  ];
+
+  if (new URLSearchParams(location.search).get("dark")) document.documentElement.classList.add("dark");
+
+  var grid = document.getElementById("grid");
+  var toastEl = document.getElementById("toast");
+  var svcEl = document.getElementById("svc");
+  var COLS = 4;
+  var pad = function(n){ return n < 10 ? "0" + n : "" + n; };
+
+  APPS.forEach(function(app, i){
+    var card = document.createElement("div");
+    card.className = "card";
+    card.dataset.index = i;
+    card.tabIndex = 0;
+    card.addEventListener("click", function(){ index = i; render(); launch(); });
+    card.innerHTML =
+      '<div class="n">' + pad(i + 1) + '</div>' +
+      '<div class="t">' + app.label + '</div>' +
+      '<div class="m">' + (app.meta || "") + '</div>';
+    grid.appendChild(card);
+  });
+
+  var cards = Array.prototype.slice.call(document.querySelectorAll(".card"));
+  var index = Math.min(parseInt(new URLSearchParams(location.search).get("focus") || "0", 10) || 0, cards.length - 1);
+
+  function render(){
+    cards.forEach(function(c, i){ c.classList.toggle("focused", i === index); });
+    document.getElementById("counter").textContent = pad(index + 1) + "—" + pad(cards.length);
+  }
+
+  function move(dx, dy){
+    var col = index % COLS, row = Math.floor(index / COLS);
+    var nc = col + dx, nr = row + dy;
+    if (dy !== 0) nr = (nr + 2) % 2;
+    else nc = (nc + COLS) % COLS;
+    var next = nr * COLS + nc;
+    if (next >= 0 && next < cards.length) { index = next; render(); }
+  }
+
+  function dbg(t){ var d = document.getElementById("dbg"); if (d) d.textContent = t; }
+
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){ toastEl.classList.remove("show"); }, 2600);
+  }
+
+  /* --- descubrimiento de apps instaladas --- */
+  var tries = 0;
+  function boot(){
+    if (new URLSearchParams(location.search).get("preview")) return;
+    tries++;
+    if (tries > 1) dbg("servicio… intento " + tries);
+    fetch(SERVICE + "/status", { cache: "no-store" })
+      .then(function(r){ return r.json(); })
+      .then(function(st){
+        return fetch(SERVICE + "/apps", { cache: "no-store" })
+          .then(function(r){ return r.json(); })
+          .then(function(list){
+            if (!Array.isArray(list)) throw new Error("lista inválida");
+            APPS.forEach(function(app){
+              var hit = list.filter(function(a){ return app.match.test(a.name || "") && a.id; })[0];
+              if (hit) { app.id = hit.id; app.installed = (hit.show !== false); }
+            });
+            svcEl.className = "svc ok";
+            var found = APPS.filter(function(a){ return a.id; }).length;
+            dbg("servicio OK · " + found + "/8 apps");
+            var missing = APPS.filter(function(a){ return !a.id; }).map(function(a){ return a.label; });
+            if (missing.length) toast("No encontradas: " + missing.join(", "));
+          });
+      })
+      .catch(function(e){
+        if (tries < 20) { setTimeout(boot, 1200); return; }
+        svcEl.className = "svc bad";
+        dbg("sin servicio · " + (e && e.message ? e.message : e));
+        toast("Servicio del módulo sin respuesta");
+      });
+  }
+
+  function launch(){
+    var app = APPS[index];
+    if (!app.id){ toast(app.label + " · no instalada en esta TV"); return; }
+    fetch(SERVICE + "/launch?id=" + encodeURIComponent(app.id))
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if (!j.ok) toast(app.label + " · no abrió");
+      })
+      .catch(function(){ toast(app.label + " · servicio caído"); });
+  }
+
+  function onKey(e){
+    var k = e.keyCode;
+    var d = document.getElementById("dbg");
+    if (d) d.textContent = "key " + k;
+    if (k === 37) move(-1, 0);
+    else if (k === 39) move(1, 0);
+    else if (k === 38) move(0, -1);
+    else if (k === 40) move(0, 1);
+    else if (k === 13 || k === 10252) launch();
+    else return;
+    e.preventDefault();
+  }
+  document.addEventListener("keydown", onKey, true);
+  window.addEventListener("keydown", onKey, false);
+
+  function tick(){
+    var d = new Date();
+    document.getElementById("clock").textContent = pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+  tick(); setInterval(tick, 20000);
+  render();
+  boot();
+</script>
+</body>
+</html>
